@@ -101,11 +101,14 @@ router.get('/author', async (req, res, next) => {
         const totalCategories = category.length;
         const totalArticles = await Articles.countDocuments();
         // 使用聚合管道查询所有 tags
-        const [{ allTags }] = await Articles.aggregate([
+        const tagsRes = await Articles.aggregate([
             { $unwind: '$tags' }, // 展开 tags 数组
             { $group: { _id: null, allTags: { $addToSet: '$tags' } } } // 收集所有 tags 并去重
         ]);
-        const totalTags = allTags.length;
+        let totalTags = 0;
+        if (tagsRes.length !== 0) {
+            totalTags = tagsRes[0].allTags.length;
+        }
         res.json({ ...author.toJSON(), totalArticles, totalTags, totalCategories });
     } catch (err) {
         console.error('获取作者信息失败:', err);
