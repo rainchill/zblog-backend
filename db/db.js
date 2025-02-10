@@ -1,32 +1,34 @@
-module.exports = function (success, error) {
-    require('dotenv').config();
+module.exports = new Promise((resolve, reject) => {
+    const dbConfig = require('../dbConfig');
     const mongoose = require('mongoose');
-
-    // 从环境变量中读取连接信息
-    const username = process.env.MONGO_USERNAME;
-    const password = process.env.MONGO_PASSWORD;
-    const host = process.env.MONGO_HOST;
-    const port = process.env.MONGO_PORT;
-    const database = process.env.MONGO_DATABASE;
+    const { username, password, database, host, port, auth } = dbConfig;
 
     // 构建连接字符串
-    const uri = `mongodb://${username}:${password}@${host}:${port}/${database}?authSource=admin`;
+    const uri = auth
+        ? `mongodb://${username}:${password}@${host}:${port}/${database}?authSource=admin`
+        : `mongodb://${host}:${port}/${database}`;
 
     // 连接到 MongoDB 数据库
-    // mongoose.connect('mongodb://127.0.0.1:27017/zblog-backend')
+    console.log('uri=', uri);
     mongoose.connect(uri)
-        .then(() => console.log('Connected to MongoDB'))
-        .catch(err => console.error('Failed to connect to MongoDB:', err));
+        .then(() => {
+            console.log('数据库连接成功');
+            // success();
+            resolve('hahahahha');
+        })
+        .catch(err => {
+            console.error('数据库连接失败:', err)
+            reject();
+        });
 
+    // mongoose.connection.once('open', () => {
+    //     console.log('数据库连接成功');
+    //     success();
+    // });
 
-    mongoose.connection.once('open', () => {
-        console.log('数据库连接成功');
-        success();
-    });
-
-    mongoose.connection.on('error', (err) => {
-        error();
-    });
+    // mongoose.connection.on('error', (err) => {
+    //     error();
+    // });
 
     mongoose.connection.on('close', () => {
         console.log('数据库连接关闭');
@@ -35,4 +37,17 @@ module.exports = function (success, error) {
     mongoose.connection.on('disconnected', () => {
         console.log('数据库连接断开');
     });
-}
+})
+    // 初始化数据库
+    .then(async (value) => {
+        const Authors = require('../models/AuthorModel');
+        await Authors.findOneAndUpdate(
+            {},
+            {},
+            { upsert: true }
+        );
+
+    })
+// .then((v) => {
+//     console.log('v=', v);
+// })

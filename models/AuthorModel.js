@@ -10,14 +10,19 @@ const AuthorSchema = new Schema({
     },
     name: {
         type: String,
-        default: 'Zhongyh'
+        default: 'rainchill'
     },
     description: {
         type: String,
-        require: true
+        default: 'Life is short, code is long.'
+    },
+    link: {
+        type: String,
+        default: 'https://github.com/rainchill/zblog'
     }
 });
 
 const Authors = mongoose.model('authors', AuthorSchema);
+
 
 module.exports = Authors;

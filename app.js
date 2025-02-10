@@ -6,9 +6,8 @@ var logger = require('morgan');
 const cors = require('cors');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 var loginRouter = require('./routes/login');
-var apiRouter = require('./routes/api');
+var apiRouter = require('./routes/api/api');
 
 var app = express();
 
@@ -26,7 +25,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/login', loginRouter);
 app.use('/api', apiRouter)
 // 设置静态文件目录

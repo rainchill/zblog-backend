@@ -1,8 +1,9 @@
 var express = require('express');
 const multer = require('multer');
 var router = express.Router();
-const Articles = require('../models/ArticleModel');
-const Authors = require('../models/AuthorModel');
+const Articles = require('../../models/ArticleModel');
+const Authors = require('../../models/AuthorModel');
+// const Category = require('../../models/CategoryModel');
 
 // /api/articles?category=xxx&page=xxx&pageSize=xxx
 // 根据分类获取文章
@@ -43,9 +44,13 @@ router.get('/articles', async (req, res, next) => {
 // 添加文章
 router.post('/articles', async (req, res, next) => {
     try {
-        // console.log('ssssssssssssssssssssssssss:', req.body);
         const newArticle = new Articles(req.body);
         await newArticle.save();
+        // await Category.findOneAndUpdate(
+        //     { category: req.body.category },
+        //     { $inc: { count: 1 } },
+        //     { upsert: true }
+        // );
         res.status(201).send(newArticle);
     } catch (err) {
         console.error('Failed to add article:', err);
@@ -53,9 +58,24 @@ router.post('/articles', async (req, res, next) => {
     }
 });
 
+// 删除文章
 router.delete('/articles/:id', async (req, res) => {
     try {
-        await Articles.findByIdAndDelete(req.params.id);
+        const id = req.params.id;
+        const article = await Articles.findById(id);
+        // console.log('delete article=', article);
+        // const category = await Category.findOneAndUpdate(
+        //     { category: article.category },
+        //     { $inc: { count: -1 } },
+        //     { new: true }
+        // );
+        // if (category) {
+        //     if (category.count === 0) {
+        //         await Category.deleteOne({ category: article.category });
+        //         // console.log('分类条目', article.category, '已经删除');
+        //     }
+        // }
+        await Articles.findByIdAndDelete(id);
         res.status(204).send(); // 返回 204 表示删除成功
     } catch (err) {
         console.error('Failed to delete article:', err);
@@ -68,7 +88,25 @@ router.delete('/articles/:id', async (req, res) => {
 router.get('/author', async (req, res, next) => {
     try {
         const author = await Authors.findOne();
-        res.json(author);
+        const category = await Articles.aggregate([
+            {
+                $group: {
+                    _id: '$category',
+                },
+            },
+            {
+                $sort: { _id: 1 }
+            }
+        ]);
+        const totalCategories = category.length;
+        const totalArticles = await Articles.countDocuments();
+        // 使用聚合管道查询所有 tags
+        const [{ allTags }] = await Articles.aggregate([
+            { $unwind: '$tags' }, // 展开 tags 数组
+            { $group: { _id: null, allTags: { $addToSet: '$tags' } } } // 收集所有 tags 并去重
+        ]);
+        const totalTags = allTags.length;
+        res.json({ ...author.toJSON(), totalArticles, totalTags, totalCategories });
     } catch (err) {
         console.error('获取作者信息失败:', err);
     }

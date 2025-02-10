@@ -6,7 +6,8 @@ const config = require('../config/config')
 const CategorySchema = new Schema({
     category: {
         type: String,
-        default: '未分类'
+        default: '未分类',
+        unique: true
     },
     count: {
         type: Number,
@@ -14,6 +15,6 @@ const CategorySchema = new Schema({
     },
 });
 
-const Category = mongoose.model('category', AuthorSchema);
+const Category = mongoose.model('category', CategorySchema);
 
 module.exports = Category;
