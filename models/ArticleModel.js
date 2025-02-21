@@ -21,13 +21,29 @@ const ArticleSchema = new Schema({
     tags: [String],
     comments: [
         {
-            username: {
-                type: String,
-                required: true // 评论者用户名是必填字段
+            id: {
+                type: String
             },
-            content: {
+            name: {
+                type: String,
+            },
+            email: {
+                type: String
+            },
+            website: {
+                type: String
+            },
+            desc: {
                 type: String,
                 required: true // 评论内容是必填字段
+            },
+            defaultAvatar: {
+                type: Boolean,
+                default: true
+            },
+            date: {
+                type: Date,
+                default: Date.now
             }
         }
     ],

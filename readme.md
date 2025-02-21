@@ -2,7 +2,7 @@
 
 要连接mongodb数据库需要在根目录下创建**dbConfig.js**文件，其格式为
 
-```json
+```javascript
 const db = {
     production: {
         username: 'xxx',
@@ -24,7 +24,6 @@ const db = {
 
 module.exports = db['production'];
 ```
-
 
 // /api/articles?category=xxx&page=xxx&pageSize=xxx
 

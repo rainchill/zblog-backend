@@ -58,6 +58,28 @@ router.post('/articles', async (req, res, next) => {
     }
 });
 
+// 添加评论
+router.post('/comments', async (req, res, next) => {
+    try {
+        const { articleID, ...newComment } = req.body;
+        console.log('articleID=', articleID, 'newComment=', newComment);
+        const result = await Articles.findByIdAndUpdate(
+            articleID,
+            {
+                $push: {
+                    comments: newComment
+                }
+            },
+            { new: true }
+        )
+        // console.log('更新后的文章：', res);
+        res.status(201).send(newComment);
+    } catch (err) {
+        console.error('Failed to add commment:', err);
+        res.status(500).json({ error: 'Failed to add commment' });
+    }
+})
+
 // 删除文章
 router.delete('/articles/:id', async (req, res) => {
     try {
